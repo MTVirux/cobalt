@@ -16,10 +16,10 @@ services:
         environment:
             # replace https://api.url.example/ with your instance's url
             # or else tunneling functionality won't work properly
-            API_URL:"${API_URL}"s
-            TURNSTILE_SITEKEY:"${TURNSTILE_SITEKEY}"
-            TURNSTILE_SECRET:"${TURNSTILE_SECRET}"
-            JWT_SECRET:"${JWT_SECRET}"
+            - API_URL="${API_URL}"
+            - TURNSTILE_SITEKEY="${TURNSTILE_SITEKEY}"
+            - TURNSTILE_SECRET="${TURNSTILE_SECRET}"
+            - JWT_SECRET="${JWT_SECRET}"
 
             # if you want to use cookies for fetching data from services,
             # uncomment the next line & volumes section
@@ -46,11 +46,11 @@ services:
             - /var/run/docker.sock:/var/run/docker.sock
 
     # if needed, use this image for automatically generating poToken & visitor_data
-    # yt-session-generator:
-    #     image: ghcr.io/imputnet/yt-session-generator:webserver
+    yt-session-generator:
+        image: ghcr.io/imputnet/yt-session-generator:webserver
 
-    #     init: true
-    #     restart: unless-stopped
-    #     container_name: yt-session-generator
-    #     labels:
-    #       - com.centurylinklabs.watchtower.scope=cobalt
+        init: true
+        restart: unless-stopped
+        container_name: yt-session-generator
+        labels:
+          - com.centurylinklabs.watchtower.scope=cobalt
