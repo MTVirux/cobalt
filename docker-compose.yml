@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
     cobalt-api:
         image: ghcr.io/imputnet/cobalt:10
@@ -7,19 +9,20 @@ services:
         restart: unless-stopped
         container_name: cobalt-api
 
+        # expose port only to reverse proxy
         ports:
-            - 9000:9000/tcp
-            # if you use a reverse proxy (such as nginx),
-            # uncomment the next line and remove the one above (9000:9000/tcp):
-            # - 127.0.0.1:9000:9000
+            - 127.0.0.1:9000:9000
 
         environment:
             # replace https://api.url.example/ with your instance's url
             # or else tunneling functionality won't work properly
-            - API_URL="${API_URL}"
-            - TURNSTILE_SITEKEY="${TURNSTILE_SITEKEY}"
-            - TURNSTILE_SECRET="${TURNSTILE_SECRET}"
-            - JWT_SECRET="${JWT_SECRET}"
+            - API_URL=${API_URL}
+            - API_PORT=${API_PORT}
+
+            #Uncomment to use
+            #- TURNSTILE_SITEKEY="${TURNSTILE_SITEKEY}"
+            #- TURNSTILE_SECRET="${TURNSTILE_SECRET}"
+            #- JWT_SECRET="${JWT_SECRET}"
 
             # if you want to use cookies for fetching data from services,
             # uncomment the next line & volumes section
@@ -30,12 +33,54 @@ services:
 
             # see /docs/run-an-instance.md for more variables that you can use here
 
+            # for automatic HTTPS with nginx-proxy + letsencrypt
+            - VIRTUAL_HOST=${VIRTUAL_HOST}
+            - VIRTUAL_PORT=${API_PORT}
+            - LETSENCRYPT_HOST=${LETSENCRYPT_HOST}
+            - LETSENCRYPT_EMAIL=${LETSENCRYPT_EMAIL}
+
         labels:
             - com.centurylinklabs.watchtower.scope=cobalt
 
         # uncomment only if you use the COOKIE_PATH variable
         # volumes:
             # - ./cookies.json:/cookies.json
+
+        networks:
+            - proxy
+
+    # nginx reverse proxy (with automatic HTTPS)
+    nginx-proxy:
+        image: jwilder/nginx-proxy
+        container_name: nginx-proxy
+        restart: unless-stopped
+        ports:
+            - 80:80
+            - 443:443
+        volumes:
+            - /var/run/docker.sock:/tmp/docker.sock:ro
+            - ./nginx/certs:/etc/nginx/certs:ro
+            - ./nginx/vhost.d:/etc/nginx/vhost.d
+            - ./nginx/html:/usr/share/nginx/html
+        networks:
+            - proxy
+
+    # letsencrypt companion for automatic TLS
+    letsencrypt:
+        image: jrcs/letsencrypt-nginx-proxy-companion
+        container_name: nginx-letsencrypt
+        restart: unless-stopped
+        environment:
+            - NGINX_PROXY_CONTAINER=nginx-proxy
+        volumes:
+            - /var/run/docker.sock:/var/run/docker.sock:ro
+            - ./nginx/certs:/etc/nginx/certs
+            - ./nginx/vhost.d:/etc/nginx/vhost.d
+            - ./nginx/html:/usr/share/nginx/html
+        depends_on:
+            - nginx-proxy
+        networks:
+            - proxy
 
     # watchtower updates the cobalt image automatically
     watchtower:
@@ -46,11 +91,17 @@ services:
             - /var/run/docker.sock:/var/run/docker.sock
 
     # if needed, use this image for automatically generating poToken & visitor_data
-    yt-session-generator:
-        image: ghcr.io/imputnet/yt-session-generator:webserver
+    #yt-session-generator:
+    #    image: ghcr.io/imputnet/yt-session-generator:webserver
+    #
+    #    init: true
+    #    restart: unless-stopped
+    #    container_name: yt-session-generator
+    #    labels:
+    #      - com.centurylinklabs.watchtower.scope=cobalt
+    #    networks:
+    #      - proxy
 
-        init: true
-        restart: unless-stopped
-        container_name: yt-session-generator
-        labels:
-          - com.centurylinklabs.watchtower.scope=cobalt
+networks:
+    proxy:
+        external: false
