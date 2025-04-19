@@ -23,5 +23,4 @@ keys.json
 *.pub
 *.crt
 *.key
-
 *.companion
