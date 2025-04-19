@@ -36,7 +36,7 @@ services:
             # for automatic HTTPS with nginx-proxy + letsencrypt
             - VIRTUAL_HOST=${VIRTUAL_HOST}
             - VIRTUAL_PORT=${API_PORT}
-            - LETSENCRYPT_HOST=${LETSENCRYPT_HOST}
+            - LETSENCRYPT_HOST=${VIRTUAL_HOST}
             - LETSENCRYPT_EMAIL=${LETSENCRYPT_EMAIL}
 
         labels:
