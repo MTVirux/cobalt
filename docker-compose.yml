@@ -57,6 +57,8 @@ services:
         ports:
             - 80:80
             - 443:443
+        environment:
+            - TRUST_DOWNSTREAM_PROXY=${TRUST_DOWNSTREAM_PROXY}
         volumes:
             - /var/run/docker.sock:/tmp/docker.sock:ro
             - ./nginx/certs:/etc/nginx/certs:ro
