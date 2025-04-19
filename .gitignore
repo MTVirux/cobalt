@@ -17,3 +17,11 @@ keys.json
 
 # ide
 .vscode
+
+#keys
+*.pem
+*.pub
+*.crt
+*.key
+
+*.companion
