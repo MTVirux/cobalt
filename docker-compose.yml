@@ -28,7 +28,7 @@ services:
 
             # if you want to use cookies for fetching data from services,
             # uncomment the next line & volumes section
-            # COOKIE_PATH: "/cookies.json"
+            - COOKIE_PATH: "/cookies.json"
 
             # it's recommended to configure bot protection or api keys if the instance is public,
             # see /docs/protect-an-instance.md for more info
