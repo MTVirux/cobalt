@@ -1,4 +1,4 @@
-Up @ https://nc.mtvirux.app
+Up @ https://nc.mtvirux.app - No youtube because IP got blocked 😅
 <p>Man, I just wanted some cybergrind songs</p>
 <hr>
 <div align="center">
