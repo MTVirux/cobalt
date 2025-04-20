@@ -1,4 +1,4 @@
-Up @ https://cobalt.mtvirux.app
+Up @ https://nc.mtvirux.app
 <p>Man, I just wanted some cybergrind songs</p>
 <hr>
 <div align="center">
