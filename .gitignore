@@ -24,3 +24,7 @@ keys.json
 *.crt
 *.key
 *.companion
+
+
+#temp scripts
+get-docker.sh
