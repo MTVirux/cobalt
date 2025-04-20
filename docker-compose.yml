@@ -3,7 +3,9 @@ version: '3.8'
 services:
     cobalt-api:
         image: ghcr.io/imputnet/cobalt:10
-
+        #build: 
+        #    dockerfile: Dockerfile
+        #    context: .
         init: true
         read_only: true
         restart: unless-stopped
@@ -38,14 +40,15 @@ services:
             - VIRTUAL_PORT=${API_PORT}
             - LETSENCRYPT_HOST=${VIRTUAL_HOST}
             - LETSENCRYPT_EMAIL=${LETSENCRYPT_EMAIL}
-
+            - YOUTUBE_SESSION_SERVER=${YOUTUBE_SESSION_SERVER}
         labels:
             - com.centurylinklabs.watchtower.scope=cobalt
-
+        depends_on:
+            yt-session-generator:
+                condition: service_healthy
         # uncomment only if you use the COOKIE_PATH variable
-        # volumes:
-            # - ./cookies.json:/cookies.json
-
+        volumes:
+            - ./cookies.json:/cookies.json
         networks:
             - proxy
 
@@ -59,11 +62,12 @@ services:
             - 443:443
         environment:
             - TRUST_DOWNSTREAM_PROXY=${TRUST_DOWNSTREAM_PROXY}
+            - RESOLVER=8.8.8.8
         volumes:
             - /var/run/docker.sock:/tmp/docker.sock:ro
-            - nginx_certs:/etc/nginx/certs
-            - nginx_vhost:/etc/nginx/vhost.d
-            - nginx_html:/usr/share/nginx/html
+            - ./nginx/certs:/etc/nginx/certs
+            - ./nginx/vhost:/etc/nginx/vhost.d
+            - ./nginx/html:/usr/share/nginx/html
         networks:
             - proxy
 
@@ -76,9 +80,9 @@ services:
             - NGINX_PROXY_CONTAINER=nginx-proxy
         volumes:
             - /var/run/docker.sock:/var/run/docker.sock:ro
-            - nginx_certs:/etc/nginx/certs
-            - nginx_vhost:/etc/nginx/vhost.d
-            - nginx_html:/usr/share/nginx/html
+            - ./nginx/certs:/etc/nginx/certs
+            - ./nginx/vhost:/etc/nginx/vhost.d
+            - ./nginx/html:/usr/share/nginx/html
         depends_on:
             - nginx-proxy
         networks:
@@ -93,17 +97,27 @@ services:
             - /var/run/docker.sock:/var/run/docker.sock
 
     # if needed, use this image for automatically generating poToken & visitor_data
-    #yt-session-generator:
-    #    image: ghcr.io/imputnet/yt-session-generator:webserver
-    #
-    #    init: true
-    #    restart: unless-stopped
-    #    container_name: yt-session-generator
-    #    labels:
-    #      - com.centurylinklabs.watchtower.scope=cobalt
-    #    networks:
-    #      - proxy
-
+    yt-session-generator:
+        #image: ghcr.io/imputnet/yt-session-generator:webserver
+        build:
+            dockerfile: Dockerfile.yt-session-generator
+            context: .
+    
+        init: true
+        restart: unless-stopped
+        container_name: yt-session-generator
+        ports:
+            - 8081:8080
+        labels:
+            - com.centurylinklabs.watchtower.scope=cobalt
+        networks:
+            - proxy
+        healthcheck:
+            test: ["CMD", "curl", "-f", "http://localhost:8080/token"]
+            interval: 1m30s
+            timeout: 30s
+            retries: 5
+            start_period: 30s
 networks:
     proxy:
         external: false
