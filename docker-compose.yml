@@ -18,13 +18,13 @@ services:
         environment:
             # replace https://api.url.example/ with your instance's url
             # or else tunneling functionality won't work properly
-            - API_URL=${API_URL}
-            - API_PORT=${API_PORT}
+            - API_URL: ${API_URL}
+            - API_PORT: ${API_PORT}
 
             #Uncomment to use
-            #- TURNSTILE_SITEKEY="${TURNSTILE_SITEKEY}"
-            #- TURNSTILE_SECRET="${TURNSTILE_SECRET}"
-            #- JWT_SECRET="${JWT_SECRET}"
+            #- TURNSTILE_SITEKEY: "${TURNSTILE_SITEKEY}"
+            #- TURNSTILE_SECRET: "${TURNSTILE_SECRET}"
+            #- JWT_SECRET: "${JWT_SECRET}"
 
             # if you want to use cookies for fetching data from services,
             # uncomment the next line & volumes section
@@ -36,11 +36,11 @@ services:
             # see /docs/run-an-instance.md for more variables that you can use here
 
             # for automatic HTTPS with nginx-proxy + letsencrypt
-            - VIRTUAL_HOST=${VIRTUAL_HOST}
-            - VIRTUAL_PORT=${API_PORT}
-            - LETSENCRYPT_HOST=${VIRTUAL_HOST}
-            - LETSENCRYPT_EMAIL=${LETSENCRYPT_EMAIL}
-            - YOUTUBE_SESSION_SERVER=${YOUTUBE_SESSION_SERVER}
+            - VIRTUAL_HOST: ${VIRTUAL_HOST}
+            - VIRTUAL_PORT: ${API_PORT}
+            - LETSENCRYPT_HOST: ${VIRTUAL_HOST}
+            - LETSENCRYPT_EMAIL: ${LETSENCRYPT_EMAIL}
+            - YOUTUBE_SESSION_SERVER: ${YOUTUBE_SESSION_SERVER}
         labels:
             - com.centurylinklabs.watchtower.scope=cobalt
         depends_on:
